@@ -89,10 +89,14 @@ imputed_data$date <- as.Date(as.character(imputed_data$date), "%Y-%m-%d")
 activity_data_transformed <- transform(imputed_data, weekday_ind = factor(ifelse(weekdays(imputed_data$date) %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"), 1, 0)))
 
 activity_weekday <- filter(activity_data_transformed, weekday_ind == 1)
+activity_weekend <- filter(activity_data_transformed, weekday_ind == 0)
 
 avg_steps_per_interval_weekday <- summarize(group_by(activity_weekday, interval), steps = mean(steps))
+avg_steps_per_interval_weekend <- summarize(group_by(activity_weekend, interval), steps = mean(steps))
 
-plot(avg_steps_per_interval_weekday$interval, avg_steps_per_interval_weekday$steps, type = 'l', col = "green", xlab = "Interval", ylab = "Average steps each day", lwd = 2.5, main = "Average steps across weekdays by interval")
+par(mfrow = c(1,2))
+plot(avg_steps_per_interval_weekday$interval, avg_steps_per_interval_weekday$steps, type = 'l', col = "green", xlab = "Interval", ylab = "Average steps each day", lwd = 2.5, main = "Average steps across weekdays")
+plot(avg_steps_per_interval_weekend$interval, avg_steps_per_interval_weekend$steps, type = 'l', col = "red", xlab = "Interval", ylab = "Average steps each day", lwd = 2.5, main = "Average steps across weekends ")
 ```
 
 
