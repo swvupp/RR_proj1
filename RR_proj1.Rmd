@@ -1,0 +1,98 @@
+---
+title: "RR_proj1"
+author: "Swetha Vuppalanchi"
+date: "May 13, 2017"
+output: html_document
+---
+
+## Read data into R
+
+```{r readata}
+setwd("~/Coursera/Data Science/Reproducible Research")
+activity_data <- read.csv("activity.csv", header = TRUE)
+```
+
+```{r load_packages, include=FALSE}
+library(dplyr)
+```
+
+## Calculate total number of steps per day
+```{r aggregate_data}
+activity_data_clean <- na.omit(activity_data)
+activity_data_total <- summarize(group_by(activity_data_clean, date), steps = sum(steps))
+head(activity_data_total)
+```
+
+## Plot histogram and bar plot
+
+```{r plots}
+
+hist(activity_data_total$steps, col="red", xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
+     
+barplot(height = activity_data_total$steps, names.arg = activity_data_total$date, xlab = "Date", ylab = "Total number of steps", main = "Total number of steps by Date", col = "blue")     
+```
+
+## Calculate mean and median for total steps per day
+
+```{r calculate_mean_median}
+activity_data_means <- mean(activity_data_total$steps)
+activity_data_means
+activity_data_median <- median(activity_data_total$steps)
+activity_data_median
+```
+
+## Average number of steps taken across days by interval
+
+```{r timeseries_plot}
+avg_steps_per_interval <- summarize(group_by(activity_data_clean, interval), steps = mean(steps))
+plot(avg_steps_per_interval$interval, avg_steps_per_interval$steps, type = 'l', col = "green", xlab = "Interval", ylab = "Average steps each day", lwd = 2.5, main = "Average steps across all days by interval")
+
+max_steps_interval <- subset(avg_steps_per_interval, steps == max(steps))
+max_steps_interval
+```
+
+## Calculate missing values and impute missing values with mean
+
+```{r impute_missing_values}
+num_missing_values <- sum(is.na(activity_data))
+num_missing_values
+imputed_data <- transform(activity_data, steps = ifelse(is.na(activity_data$steps), avg_steps_per_interval$steps[match(activity_data$interval, avg_steps_per_interval$interval)], activity_data$steps))
+head(imputed_data)
+```
+
+## Plot histogram and calculate mean and median values with new imputed dataset
+
+```{r recalculate_mean_median}
+activity_data_total_imp <- summarize(group_by(imputed_data, date), steps = sum(steps))
+
+hist(activity_data_total_imp$steps, col="red", xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
+
+activity_data_imp_means <- mean(activity_data_total_imp$steps)
+activity_data_imp_means
+activity_data_imp_median <- median(activity_data_total_imp$steps)
+activity_data_imp_median
+```
+
+## Calculate the differences between mean and median for the original dataset and imputed dataset
+
+```{r calculate_difference}
+mean_diff <- abs(activity_data_imp_means - activity_data_means)
+mean_diff
+
+median_diff <- abs(activity_data_imp_median - activity_data_median)
+median_diff
+```
+## Plot average number of steps taken across days per interval for weekdays
+
+```{r avg_steps_weekdays}
+imputed_data$date <- as.Date(as.character(imputed_data$date), "%Y-%m-%d")
+activity_data_transformed <- transform(imputed_data, weekday_ind = factor(ifelse(weekdays(imputed_data$date) %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"), 1, 0)))
+
+activity_weekday <- filter(activity_data_transformed, weekday_ind == 1)
+
+avg_steps_per_interval_weekday <- summarize(group_by(activity_weekday, interval), steps = mean(steps))
+
+plot(avg_steps_per_interval_weekday$interval, avg_steps_per_interval_weekday$steps, type = 'l', col = "green", xlab = "Interval", ylab = "Average steps each day", lwd = 2.5, main = "Average steps across weekdays by interval")
+```
+
+
