@@ -27,9 +27,8 @@ head(activity_data_total)
 
 ```{r plots}
 
-hist(activity_data_total$steps, col="red", xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
+hist(activity_data_total$steps, breaks=20, col="red", xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
      
-barplot(height = activity_data_total$steps, names.arg = activity_data_total$date, xlab = "Date", ylab = "Total number of steps", main = "Total number of steps by Date", col = "blue")     
 ```
 
 ## Calculate mean and median for total steps per day
@@ -65,7 +64,7 @@ head(imputed_data)
 ```{r recalculate_mean_median}
 activity_data_total_imp <- summarize(group_by(imputed_data, date), steps = sum(steps))
 
-hist(activity_data_total_imp$steps, col="red", xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
+hist(activity_data_total_imp$steps, col="red", breaks=20, xlab = "Total Steps taken each day", main = "Distribution of Total Steps taken each day")
 
 activity_data_imp_means <- mean(activity_data_total_imp$steps)
 activity_data_imp_means
